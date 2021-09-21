@@ -1,0 +1,6 @@
+/.env
+/docker/*
+api/config/jwt/*
+#DO_NOT-MODIFY_UNDER_THIS_LINE#
+plop-templates
+plopfile.js

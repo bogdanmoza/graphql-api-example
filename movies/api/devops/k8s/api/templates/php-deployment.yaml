@@ -1,0 +1,158 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ include "name" . }}-php
+  labels:
+    app.kubernetes.io/name: {{ include "name" . }}-php
+    app.kubernetes.io/part-of: {{ include "name" . }}
+    helm.sh/chart: {{ include "chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    
+spec:
+  replicas: {{ .Values.php.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: 0.0.0.0/0
+      labels:
+        app.kubernetes.io/name: {{ include "name" . }}-php
+        app.kubernetes.io/part-of: {{ include "name" . }}
+        helm.sh/chart: {{ include "chart" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-php
+          image: "{{ .Values.php.repository }}:{{ .Values.php.tag }}"
+          imagePullPolicy: {{ .Values.php.pullPolicy }}
+          volumeMounts:
+          - name: app-secret
+            mountPath: /srv/api/config/app-secret
+            readOnly: true
+          - name: jwt-certs
+            mountPath: /srv/api/config/jwt
+            readOnly: true
+          ports:
+            - containerPort: 9000
+          env: 
+            - name: APP_ENV
+              value: prod
+            - name: CORS_ALLOW_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                    name: generic-env
+                    key: env.cors_allow_origin
+            - name: TRUSTED_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                    name: generic-env
+                    key: env.trusted_hosts
+            - name: DATABASE_GENERIC_URL
+              valueFrom:
+                secretKeyRef:
+                    name: database-generic-url
+                    key: DATABASE_GENERIC_URL
+            - name: JWT_PASSPHRASE
+              valueFrom:
+                secretKeyRef:
+                    name: jwt-env
+                    key: JWT_PASSPHRASE
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                    name: app-secret
+                    key: APP_SECRET
+            - name: MERCURE_PUBLISH_URL
+              value: ""
+            - name: MERCURE_JWT_TOKEN
+              value: ""
+            - name: VARNISH_URL
+              value: ""
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: jwt-env
+                    key: JWT_SECRET_KEY
+            - name: JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: jwt-env
+                    key: JWT_PUBLIC_KEY
+            - name: JWT_PUBLIC_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: jwt-env
+                    key: JWT_PUBLIC_KEY  
+            - name: BUGSNAG_API_KEY
+              valueFrom:
+                secretKeyRef:
+                    name: bugsnag-api
+                    key: BUGSNAG_API 
+            - name: APP_NAME
+              valueFrom:
+                configMapKeyRef:
+                    name: {{ include "name" . }}-env
+                    key: env.app_name
+            - name: SERVICE_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                    name: generic-env
+                    key: env.service-endpoint
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                    name: generic-env
+                    key: env.redis-url
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+        - name: {{ .Chart.Name }}-database
+          image: "{{ .Values.database.repository }}:{{ .Values.database.tag }}"
+          imagePullPolicy: {{ .Values.database.pullPolicy }}
+        {{- if .Values.database.ports }}
+          ports:
+          {{- range $containerPort :=  .Values.database.ports }}
+            - containerPort : {{ $containerPort }} 
+          {{- end }}
+        {{- end }}
+          env: 
+            - name: INSTANCE
+              valueFrom:
+                configMapKeyRef:
+                    name: generic-env
+                    key: env.mysql_connection
+          command: ["/cloud_sql_proxy"]
+          args: ["--dir=/cloudsql", $(INSTANCE), "-credential_file=/secrets/cloudsql/sql-credential.json"]
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+            - name: cloudsql
+              mountPath: /cloudsql
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      volumes:
+      - name: app-secret
+        secret:
+          secretName: app-secret
+      - name: ssl-certs
+        hostPath:
+          path: /etc/ssl/certs
+      - name: jwt-certs
+        secret:
+          secretName: jwt-certs
+      - name: cloudsql-instance-credentials
+        secret:
+          secretName: sql-credentials
+      - name: cloudsql
+        emptyDir:

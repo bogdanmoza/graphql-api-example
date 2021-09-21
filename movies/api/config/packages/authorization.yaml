@@ -1,0 +1,5 @@
+parameters:
+    authorization:
+        enabled: true
+        service_name: '%env(APP_NAME)%'
+        redis_url: '%env(REDIS_URL)%'

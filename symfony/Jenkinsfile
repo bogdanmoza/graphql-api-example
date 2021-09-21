@@ -1,0 +1,8 @@
+
+def serviceName = "symfony"
+
+APIPlatformBasedDeployment(
+    clients:  getSaaSClients(serviceName),
+    serviceName: serviceName,
+    slackChannel: '#rmt-microservices'
+)

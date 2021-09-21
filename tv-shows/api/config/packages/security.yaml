@@ -1,0 +1,11 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+
+    firewalls:
+        dev:
+            pattern: ^/_(profiler|wdt)
+            security: false
+        api:
+            pattern:   ^/tv-shows-service/api/
+            stateless: true
+            anonymous: true

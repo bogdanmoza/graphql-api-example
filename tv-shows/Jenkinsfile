@@ -1,0 +1,8 @@
+
+def serviceName = "tv-shows"
+
+APIPlatformBasedDeployment(
+    clients:  getSaaSClients(serviceName),
+    serviceName: serviceName,
+    slackChannel: '#rmt-microservices'
+)

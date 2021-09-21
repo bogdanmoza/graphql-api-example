@@ -1,0 +1,18 @@
+authentication_token:
+    path: /movies-service/api/authentication_token
+    methods: ['POST']
+swagger_ui:
+    path: /movies-service/docs
+    controller: api_platform.swagger.action.ui
+homepage:
+    path: /movies-service
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /movies-service/docs
+        permanent: true
+health_check:
+    path: /movies-service/healthcheck
+    controller: app\Controller\HealthCheckController::__invoke
+ping:
+    path: /movies-service/ping
+    controller: app\Controller\PingController::__invoke

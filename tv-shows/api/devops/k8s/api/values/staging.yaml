@@ -1,0 +1,32 @@
+# Default values for api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+php:
+  repository: eu.gcr.io/rmt-container-registry/tv-shows/php
+  tag: latest
+  pullPolicy: Always
+  replicaCount: 2
+  hpa_enabled: true
+  hpa_min_replicas: 1
+  hpa_max_replicas: 3
+
+database:
+  enabled:  true
+  repository: gcr.io/cloudsql-docker/gce-proxy
+  tag: 1.16
+  pullPolicy: Always
+  replicaCount: 1
+  ports:
+    - 3306
+  mysql_connection_secret: sql-credential
+
+nginx:
+  enabled: true
+  repository: eu.gcr.io/rmt-container-registry/tv-shows/nginx
+  tag: latest
+  pullPolicy: Always
+  replicaCount: 1
+  hpa_enabled: true
+  hpa_min_replicas: 1
+  hpa_max_replicas: 3

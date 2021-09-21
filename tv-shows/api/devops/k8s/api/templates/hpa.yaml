@@ -1,0 +1,29 @@
+{{- if .Values.php.hpa_enabled }}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "name" . }}-php-hpa
+spec:
+  minReplicas: {{ .Values.php.hpa_min_replicas }}
+  maxReplicas: {{ .Values.php.hpa_max_replicas }}
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: {{ include "name" . }}-php
+  targetCPUUtilizationPercentage: 80
+{{- end }}
+---
+{{- if .Values.nginx.hpa_enabled }}
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "name" . }}-nginx-hpa
+spec:
+  minReplicas: {{ .Values.nginx.hpa_min_replicas }}
+  maxReplicas: {{ .Values.nginx.hpa_max_replicas }}
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: {{ include "name" . }}-nginx
+  targetCPUUtilizationPercentage: 80
+{{- end }}

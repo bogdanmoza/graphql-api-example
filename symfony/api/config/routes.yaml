@@ -1,0 +1,18 @@
+authentication_token:
+    path: /symfony-service/api/authentication_token
+    methods: ['POST']
+swagger_ui:
+    path: /symfony-service/docs
+    controller: api_platform.swagger.action.ui
+homepage:
+    path: /symfony-service
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /symfony-service/docs
+        permanent: true
+health_check:
+    path: /symfony-service/healthcheck
+    controller: app\Controller\HealthCheckController::__invoke
+ping:
+    path: /symfony-service/ping
+    controller: app\Controller\PingController::__invoke

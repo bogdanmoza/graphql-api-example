@@ -1,0 +1,18 @@
+authentication_token:
+    path: /tv-shows-service/api/authentication_token
+    methods: ['POST']
+swagger_ui:
+    path: /tv-shows-service/docs
+    controller: api_platform.swagger.action.ui
+homepage:
+    path: /tv-shows-service
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /tv-shows-service/docs
+        permanent: true
+health_check:
+    path: /tv-shows-service/healthcheck
+    controller: app\Controller\HealthCheckController::__invoke
+ping:
+    path: /tv-shows-service/ping
+    controller: app\Controller\PingController::__invoke

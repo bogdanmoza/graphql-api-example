@@ -1,0 +1,52 @@
+version: '3.4'
+
+x-cache-from:
+  - &api-cache-from
+    cache_from:
+      - ${NGINX_IMAGE:-quay.io/api-platform/nginx}
+      - ${PHP_IMAGE:-quay.io/api-platform/php}
+
+services:
+  popular-stars-php:
+    build:
+      context: ./api
+      dockerfile: ../Dockerfile
+      target: api_platform_php
+      <<: *api-cache-from
+    image: ${PHP_IMAGE:-quay.io/api-platform/php}
+    environment:
+        DATABASE_GENERIC_URL: mysql://root:123456@db
+        APP_NAME: popular-stars
+    depends_on:
+      - db
+    volumes:
+      - ./api:/srv/api:rw,cached
+      - ./api/devops/docker/php/conf.d/api-platform.dev.ini/:/usr/local/etc/php/conf.d/api-platform.ini:cached
+      # if you develop on Linux, you may use a bind-mounted host directory instead
+      # - ./api/var:/srv/api/var:rw
+
+  popular-stars-api:
+    build:
+      context: ./api
+      dockerfile: ../Dockerfile
+      target: api_platform_nginx
+      <<: *api-cache-from
+    image: ${NGINX_IMAGE:-quay.io/api-platform/nginx}
+    depends_on:
+      - popular-stars-php
+    volumes:
+      - ./api/public:/srv/api/public:ro,cached
+    ports:
+      - target: 80
+        published: 9012
+        protocol: tcp
+
+  db:
+    image: mysql:5.7
+    environment:
+        MYSQL_ROOT_PASSWORD: 123456
+        MYSQL_DATABASE: ${DATABASE_NAME}
+    ports:
+      - "3312:3306"
+    volumes:
+      - ./docker/db/data:/var/lib/mysql:rw,cached

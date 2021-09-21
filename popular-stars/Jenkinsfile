@@ -1,0 +1,8 @@
+
+def serviceName = "popular-stars"
+
+APIPlatformBasedDeployment(
+    clients:  getSaaSClients(serviceName),
+    serviceName: serviceName,
+    slackChannel: '#rmt-microservices'
+)

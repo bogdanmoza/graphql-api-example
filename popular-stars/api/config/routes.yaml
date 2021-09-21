@@ -1,0 +1,18 @@
+authentication_token:
+    path: /popular-stars-service/api/authentication_token
+    methods: ['POST']
+swagger_ui:
+    path: /popular-stars-service/docs
+    controller: api_platform.swagger.action.ui
+homepage:
+    path: /popular-stars-service
+    controller: Symfony\Bundle\FrameworkBundle\Controller\RedirectController::urlRedirectAction
+    defaults:
+        path: /popular-stars-service/docs
+        permanent: true
+health_check:
+    path: /popular-stars-service/healthcheck
+    controller: app\Controller\HealthCheckController::__invoke
+ping:
+    path: /popular-stars-service/ping
+    controller: app\Controller\PingController::__invoke
